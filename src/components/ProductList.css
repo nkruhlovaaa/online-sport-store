@@ -1,0 +1,77 @@
+/* Сітка товарів */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 колонки в рядку */
+  gap: 20px; /* Відступи між картками */
+  width: 100%; /* Ширина сітки */
+  box-sizing: border-box; /* Ураховує відступи в ширині */
+}
+
+/* Картка товару */
+.product-card {
+  background: #f1f5ec;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 0 auto;
+  width: 100%; /* Ширина картки по всьому доступному простору */
+  box-sizing: border-box; /* Паддінги враховуються у ширині */
+}
+
+/* Виділений товар (жовта рамка) */
+.product-card.highlighted {
+  border: 2px solid #fbc531;
+  background-color: #f2f2f2;
+}
+
+/* Заголовок */
+.product-card h3 {
+  font-size: 1.3em;
+  margin-bottom: 8px;
+  color: #764ba2;
+  font-weight: bold;
+}
+
+/* Опис, наявність, рейтинг */
+.product-card p {
+  font-size: 1em;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Ціна */
+.product-card .price {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #2c2c2c;
+}
+
+/* Кнопка */
+.product-card button {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  padding: 6px 10px;
+  font-size: 0.95em;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.product-card button:hover {
+  background-color: #fbc531;
+  color: black;
+  border-color: #fbc531;
+}
+
+/* Зображення */
+.product-card img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 15px;
+}
