@@ -1,29 +1,39 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';  // Імпортуємо хук для програмного переходу
-import './Header.css';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
 
-const Header = () => {
-  const navigate = useNavigate();  // Ініціалізація хука navigate
-
-  const goToProfile = () => {
-    navigate('/profile');  // Перехід на сторінку профілю
-  };
+const AppWithHeader = () => {
+  const navigate = useNavigate();
 
   return (
-    <header>
-      <div className="container">
-        <h1>Спортивний магазин</h1>
-        <nav>
-          <ul>
-            <li><a href="#products">Товар</a></li>
-            <li><a href="#sales">Акції</a></li>
-            <li><button onClick={goToProfile}>Мій профіль</button></li>  {/* Кнопка для переходу */}
-            <li><a href="#about">Про нас</a></li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+    <div>
+      <header>
+        <div className="container">
+          <h1>Спортивний магазин</h1>
+          <nav>
+            <ul>
+              <li><button onClick={() => navigate("/")}>Товари</button></li>
+              <li><button onClick={() => navigate("/sales")}>Акції</button></li>
+              <li><button onClick={() => navigate("/cart")}>Кошик</button></li>
+              <li><button onClick={() => navigate("/about")}>Про нас</button></li>
+              <li><button onClick={() => navigate("/profile")}>Мій профіль</button></li>
+              <li><button onClick={() => navigate("/login")}>Увійти</button></li>
+              <li><button onClick={() => navigate("/register")}>Реєстрація</button></li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/sales" element={<Sales />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </main>
+    </div>
   );
 };
-
-export default Header;
