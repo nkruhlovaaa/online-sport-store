@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase";  // Імпортуємо Firebase Auth
+import { auth, db } from "../firebase";
+import { doc, getDoc, setDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
-import './ProductList.css'; // імпортуємо стилі
+import './ProductList.css';
 
 const products = [
   {
@@ -320,9 +321,7 @@ const products = [
   // Додавайте інші товари в такому ж форматі
 ];
 
-
 const ProductCard = ({ product, isInCart, onAddToCart, addToWishlist, uid }) => {
-  // Обчислення зниженої ціни
   const discountedPrice = product.discount 
     ? product.price * (1 - product.discount / 100) 
     : product.price;
@@ -332,7 +331,6 @@ const ProductCard = ({ product, isInCart, onAddToCart, addToWishlist, uid }) => 
       <img src={product.image} alt={product.name} />
       <h3>{product.name}</h3>
       <p className="price">
-        {/* Перекреслена ціна і нова ціна зі знижкою */}
         {product.discount && <span className="old-price">{product.price} грн</span>}
         <span className={product.discount ? "discounted-price" : ""}>
           {discountedPrice} грн
@@ -344,7 +342,7 @@ const ProductCard = ({ product, isInCart, onAddToCart, addToWishlist, uid }) => 
       <button onClick={onAddToCart} disabled={isInCart}>
         {isInCart ? "Товар у кошику" : "Додати до кошика"}
       </button>
-      <button onClick={() => addToWishlist(product, uid)}>
+      <button onClick={() => addToWishlist(product)}>
         🤍 Додати до бажаного
       </button>
     </div>
@@ -353,28 +351,45 @@ const ProductCard = ({ product, isInCart, onAddToCart, addToWishlist, uid }) => 
 
 const ProductList = () => {
   const [cartItems, setCartItems] = useState([]);
+  const [wishlistItems, setWishlistItems] = useState([]);
   const [sortOption, setSortOption] = useState("none");
-  const [uid, setUid] = useState(null);  // Стан для збереження UID користувача
+  const [uid, setUid] = useState(null);
 
-  // Перевірка автентифікації користувача
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUid(user.uid); // Отримуємо UID користувача
+        setUid(user.uid);
       } else {
-        setUid(null); // Якщо користувач не автентифікований
+        setUid(null);
       }
     });
 
-    return () => unsubscribe();  // Очищаємо підписку
+    return () => unsubscribe();
   }, []);
 
-  // Використання localStorage для кошика
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
     const productNames = storedCart.map((item) => item.name);
     setCartItems(productNames);
   }, []);
+
+  useEffect(() => {
+    if (uid) {
+      const fetchWishlist = async () => {
+        const docRef = doc(db, "wishlists", uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const wishlistData = docSnap.data();
+          const productNames = wishlistData.items.map((item) => item.name);
+          setWishlistItems(productNames);
+        } else {
+          await setDoc(docRef, { items: [] });
+          setWishlistItems([]);
+        }
+      };
+      fetchWishlist();
+    }
+  }, [uid]);
 
   const handleAddToCart = (product) => {
     const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -388,16 +403,36 @@ const ProductList = () => {
     setCartItems([...cartItems, product.name]);
   };
 
-  const addToWishlist = (product, uid) => {
-    const wishlistKey = `wishlist-${uid}`;
-    const wishlist = JSON.parse(localStorage.getItem(wishlistKey)) || [];
-    const exists = wishlist.find(item => item.id === product.id);
-    if (!exists) {
-      wishlist.push(product);
-      localStorage.setItem(wishlistKey, JSON.stringify(wishlist));
+  const handleAddToWishlist = async (product) => {
+    if (!uid) {
+      alert("Будь ласка, увійдіть у свій акаунт, щоб додавати в бажане.");
+      return;
+    }
+
+    const docRef = doc(db, "wishlists", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const wishlist = docSnap.data().items;
+      const alreadyExists = wishlist.some(item => item.id === product.id);
+
+      if (alreadyExists) {
+        alert(`${product.name} вже у списку бажаного`);
+        return;
+      }
+
+      await updateDoc(docRef, {
+        items: arrayUnion(product)
+      });
+
+      setWishlistItems([...wishlistItems, product.name]);
       alert(`${product.name} додано до списку бажаного`);
     } else {
-      alert(`${product.name} вже у списку бажаного`);
+      await setDoc(docRef, {
+        items: [product]
+      });
+      setWishlistItems([product.name]);
+      alert(`${product.name} додано до списку бажаного`);
     }
   };
 
@@ -425,8 +460,8 @@ const ProductList = () => {
             product={product}
             isInCart={cartItems.includes(product.name)}
             onAddToCart={() => handleAddToCart(product)}
-            addToWishlist={addToWishlist}
-            uid={uid} // Передаємо UID користувача в ProductCard
+            addToWishlist={handleAddToWishlist}
+            uid={uid}
           />
         ))}
       </div>

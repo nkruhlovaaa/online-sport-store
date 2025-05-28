@@ -1,10 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
   <title>My Server</title>
 </head>
 <body>
   <h1>Hello from My Server</h1>
+
+  <h3>Реєстрація</h3>
+  <input type="text" id="reg-username" placeholder="Ім'я користувача">
+  <input type="password" id="reg-password" placeholder="Пароль">
+  <button onclick="register()">Зареєструватися</button>
+  <p id="register-result"></p>
+
+  <h3>Вхід</h3>
+  <input type="text" id="login-username" placeholder="Ім'я користувача">
+  <input type="password" id="login-password" placeholder="Пароль">
+  <button onclick="login()">Увійти</button>
+  <p id="login-result"></p>
+
+  <h3>Профіль</h3>
+  <button onclick="getProfile()">Отримати профіль</button>
+  <p id="profile-result"></p>
+
+  <h3>Список бажаного</h3>
+<button onclick="getWishlist()">Отримати список</button>
+<ul id="wishlist"></ul>
+
+
+
+  <script>
+    let token = '';
+
+    async function register() {
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('reg-username').value,
+          password: document.getElementById('reg-password').value
+        })
+      });
+      const data = await res.json();
+      document.getElementById('register-result').innerText = data.message || data.error;
+    }
+
+    async function login() {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('login-username').value,
+          password: document.getElementById('login-password').value
+        })
+      });
+      const data = await res.json();
+      if (data.token) {
+        token = data.token;
+        console.log("Отримано токен:", token); // лог токена
+        document.getElementById('login-result').innerText = "Успішний вхід!";
+      } else {
+        document.getElementById('login-result').innerText = data.message || data.error;
+      }
+    }
+
+    async function getProfile() {
+      console.log("Надсилаємо токен:", token); // лог перед запитом
+      const res = await fetch('/profile', {
+        headers: {
+          'Authorization': 'Bearer ' + token
+        }
+      });
+      const data = await res.json();
+      document.getElementById('profile-result').innerText = data.message || data.error;
+    }
+
+    async function getWishlist() {
+    const res = await fetch('/wishlist', {
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
+    });
+
+    const data = await res.json();
+    const listEl = document.getElementById('wishlist');
+    listEl.innerHTML = ''; // Очистити попередній список
+
+    if (res.ok) {
+      data.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.name} - ${item.price} грн`;
+        listEl.appendChild(li);
+      });
+    } else {
+      listEl.innerHTML = `<li>Помилка: ${data.message || data.error}</li>`;
+    }
+  } 
+  </script>
 </body>
 </html>

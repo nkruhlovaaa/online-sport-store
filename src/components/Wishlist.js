@@ -50,12 +50,7 @@ const Wishlist = () => {
   };
 
   const products = [
-    {
-      name: "Nike Air Zoom",
-      price: 3200,
-      discount: 15,
-      image: "https://content2.rozetka.com.ua/goods/images/big/349132734.jpg"
-    },
+    
     {
       name: "Футболка Puma",
       price: 999,
