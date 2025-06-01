@@ -15,7 +15,11 @@ if (!SECRET_KEY) {
 }
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Дозволяє локальну розробку
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Статичні файли
