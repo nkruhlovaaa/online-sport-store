@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { db } = require('./firebaseConfig');
 const express = require('express');
 const cors = require('cors');
@@ -7,7 +8,11 @@ const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = 5000;
-const SECRET_KEY = 'my_secret_key';
+const SECRET_KEY = process.env.SECRET_KEY;
+if (!SECRET_KEY) {
+  console.error("FATAL ERROR: SECRET_KEY is not defined.");
+  process.exit(1); // Зупинити додаток, якщо ключ не встановлено
+}
 
 // Middleware
 app.use(cors());
