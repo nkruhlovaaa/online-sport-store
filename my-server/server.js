@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 const SECRET_KEY = process.env.SECRET_KEY;
 if (!SECRET_KEY) {
   console.error("FATAL ERROR: SECRET_KEY is not defined.");
